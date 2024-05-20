@@ -1,0 +1,12 @@
+Package: rnewton
+Type: Package
+Title: Regularized quasi-Newton optimisation
+Version: 1.0
+Date: 2024-05-19
+Author: Bert van der Veen
+Maintainer: Bert van der Veen <bert_van_der_veen@hotmail.com>
+License: GPL (>= 2)
+Encoding: UTF-8
+RoxygenNote: 7.3.1
+Imports: Rcpp (>= 1.0.12)
+LinkingTo: Rcpp, RcppEigen
