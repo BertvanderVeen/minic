@@ -14,8 +14,8 @@ dginit = g%*%s
 if (dginit >= 0.0)return(list(x=x, f=f, g=g, step=0, info=0, nfev=0))
 
 # Initialize local variables.
-brackt = 0
-stage1 = 1
+brackt = FALSE
+stage1 = TRUE
 nfev = 0
 finit = f
 dgtest = ftol*dginit
@@ -61,6 +61,7 @@ if ((brackt & (stp <= stmin | stp >= stmax)) | nfev >= maxfev-1 | infoc == 0 | (
 # and compute the directional derivative.
 x = wa + stp * s
 f = fn(x)
+if(is.nan(f))stop("Linesearch unsuccesful") #linesearch cannot start
 g = gr(x)
 nfev = nfev + 1
 dg = g%*%s
@@ -85,7 +86,7 @@ if (info != 0)return(list(x=x, f=f, g=g, stp=stp, info=info, nfev=nfev))
 
 # In the first stage we seek a step for which the modified
 # function has a nonpositive value and nonnegative derivative.
-if (stage1 & f <= ftest1 & dg >= min(ftol,gtol)*dginit)stage1 = 0
+if (stage1 & f <= ftest1 & dg >= min(ftol,gtol)*dginit)stage1 = FALSE
 
 # A modified function is used to predict the step only if
 # we have not obtained a step for which the modified
@@ -165,7 +166,7 @@ sgnd = dp*(dx/abs(dx))
 # else the average of the cubic and quadratic steps is taken.
 if (fp > fx){
   info = 1
-bound = 1
+bound = TRUE
 theta = 3*(fx - fp)/(stp - stx) + dx + dp
 s = norm(as.matrix(c(theta,dx,dp)),"i")
 gamma = s*sqrt((theta/s)**2 - (dx/s)*(dp/s))
@@ -181,7 +182,7 @@ if (abs(stpc-stx) < abs(stpq-stx)){
 }else{
   stpf = stpc + (stpq - stpc)/2
 }
-brackt = 1
+brackt = TRUE
 
 # Second case. A lower function value and derivatives of
 # opposite sign. The minimum is bracketed. If the cubic
@@ -189,7 +190,7 @@ brackt = 1
 # the cubic step is taken, else the quadratic step is taken.
 }else if(sgnd < 0.0){
   info = 2
-bound = 0
+bound = FALSE
 theta = 3*(fx - fp)/(stp - stx) + dx + dp
 s = norm(as.matrix(c(theta,dx,dp)),"i")
 gamma = s*sqrt((theta/s)**2 - (dx/s)*(dp/s))
@@ -205,7 +206,7 @@ if (abs(stpc-stp) > abs(stpq-stp)){
 }else{
   stpf = stpq
 }
-brackt = 1
+brackt = TRUE
 
 
 # Third case. A lower function value, derivatives of the
@@ -218,7 +219,7 @@ brackt = 1
 # closest to stx is taken, else the step farthest away is taken.
 }else if((abs(dp) < abs(dx))){
   info = 3
-bound = 1
+bound = TRUE
 theta = 3*(fx - fp)/(stp - stx) + dx + dp
 s = norm(as.matrix(c(theta,dx,dp)),"i")
 
@@ -257,7 +258,7 @@ if (brackt){
 # is either stpmin or stpmax, else the cubic step is taken.
 }else{
 info = 4
-bound = 0
+bound = FALSE
 if (brackt){
   theta = 3*(fp - fy)/(sty - stp) + dy + dp
 s = norm(as.matrix(c(theta,dy,dp)),"i")

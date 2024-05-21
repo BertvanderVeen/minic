@@ -62,7 +62,7 @@
 #' @importFrom Rcpp evalCpp
 #' @exportPattern "^[[:alpha:]]+"
 #' 
-rnewt <-function(x0, fn, gr, he = NULL, 
+rnewton <-function(x0, fn, gr, he = NULL, 
                  regularize = TRUE, quasi = TRUE, method = "BFGS", verbose = FALSE, control = list(maxit = 1e3, m = 5, sigma1 = 0.5, sigma2 = 4, c1 = 1e-3, c2 = 0.9, pmin = 1e-3, tol.g = 1e-8, tol.gamma = 1e-5, tol.obj = 1e-8, tol.mu = 1e-4, tol.mu2 = 1e15, tol.c = 1e-8, report.iter = 10), ...){
   
   if(!quasi && is.null(he))stop("Function for hessian must be provided with 'quasi = FALSE'")
@@ -114,12 +114,21 @@ method = switch(method, "BFGS" = 1, "SR1" = 2, "PSB" = 3)
 
 grdold = matrix(gr(x0), nrow = 1)
 d = -t(grdold / norm(grdold,"f"))
-res <- cvsrch(fn, gr, length(x0), x0, fn(x0), grdold, d, 1, 1e-4, 0.9, 1e-16, 1e-12, 1e20, 20)
-d = res$x-x0
-pars = res$x
 
-if(is.null(he))he <- function()matrix(0)
-system.time(opt <- rnewton(x0=pars, fn=fn, gr=gr, he=he, gr0=t(grdold), d0=d, regularize=regularize, quasi=quasi, method = method, maxit = maxit, m = m, mu0 = 1, sigma1 = sigma1, sigma2 = sigma2, c1 = c1, c2 = c2, pmin = pmin, tolg = tol.g, tolgamma = tol.gamma, tolobj = tol.obj, tolmu = tol.mu, tolmu2 = tol.mu2, tolc = tol.c , verbose = verbose, riter = report.iter))
+lerr <- try({
+res <- cvsrch(fn, gr, length(x0), x0, fn(x0), grdold, d, 1, 1e-4, 0.9, 1e-16, 1e-12, 1e20, 20);
+
+d = res$x-x0;
+pars = res$x;
+}, silent = TRUE)
+# linesearch failed for some reason, try something simpler.
+if(inherits(lerr,"try-error")){
+  pars = x0-d
+}
+
+if(quasi)he <- function()matrix(0)
+  
+system.time(opt <- rnewt(x0=pars, fn=fn, gr=gr, he=he, gr0=t(grdold), d0=d, regularize=regularize, quasi=quasi, method = method, maxit = maxit, m = m, mu0 = 1, sigma1 = sigma1, sigma2 = sigma2, c1 = c1, c2 = c2, pmin = pmin, tolg = tol.g, tolgamma = tol.gamma, tolobj = tol.obj, tolmu = tol.mu, tolmu2 = tol.mu2, tolc = tol.c , verbose = verbose, riter = report.iter))
 
 opt$par <- c(opt$par)
 if(!is.null(names(x0))) names(opt$par) <- names(x0)

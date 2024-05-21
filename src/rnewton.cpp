@@ -1,6 +1,6 @@
 // -*- mode: C++; c-indent-level: 4; c-basic-offset: 4; indent-tabs-mode: nil; -*-
 
-// we only include RcppEigen.h which pulls Rcpp.h in for us
+// we only include RcppEigen.h which pulls Rcpp.h in
 #include <RcppEigen.h>
 using namespace Rcpp;
 using Eigen::MatrixXd;
@@ -10,16 +10,12 @@ using Eigen::VectorXd;
 // RcppEigen so that the build process will know what to do
 //
 // [[Rcpp::depends(RcppEigen)]]
-
-// simple example of creating two matrices and
-// returning the result of an operation on them
-//
 // via the exports attribute we tell Rcpp to make this function
 // available from R
 //
 //
 // [[Rcpp::export]]
-Rcpp::List rnewton(const Eigen::VectorXd &x0, 
+Rcpp::List rnewt(const Eigen::VectorXd &x0, 
                    Rcpp::Function fn,
                    Rcpp::Function gr,
                    Rcpp::Function he, 
@@ -62,6 +58,7 @@ Rcpp::List rnewton(const Eigen::VectorXd &x0,
   int info = 0;
   double ared = 0; //achieved improvement
   double pred = 0; //predicted improvement
+  double arediter = 0;//cumulative improvement for printing messages
   double objnew = 0; //best so far
   double obj = Rcpp::as<double>(fn(x0)); //obj of step
   double gamma = 1;double newgamma = 0;
@@ -111,9 +108,12 @@ Rcpp::List rnewton(const Eigen::VectorXd &x0,
           S.col(si) = d;
           si++;
           }
-          newgamma = (y.transpose()*y).value()/sy;
-          gamma = std::min(1/tolgamma, newgamma);
+          // newgamma = (y.transpose()*y).value()/sy;
+          // gamma = std::min(1/tolgamma, newgamma);
         }
+        //not convinced i should be cautiously updating gamma.
+        newgamma = (y.transpose()*y).value()/sy;
+        gamma = std::min(1/tolgamma, newgamma);
 
         if(!std::isnan(rho)){
           if(si<=s && SY.cols()<s){
@@ -190,11 +190,12 @@ Rcpp::List rnewton(const Eigen::VectorXd &x0,
       d = -pow(gamma+mu0, -1)*grd + pow(gamma+mu0, -2)*A*(Q+pow(gamma+mu0,-1)*A.transpose()*A).lu().solve(A.transpose()*grd);
     }else{ // do newton update is quasi is starting
     if(pass)hess = Rcpp::as<MatrixXd>(he(x)); //only recalculate hessian if parameters were updated
-    d = -(hess + mu0*MatrixXd::Identity(hess.rows(),hess.cols())).llt().solve(grd);
+    if(regularize)d = -(hess + mu0*MatrixXd::Identity(hess.rows(),hess.cols())).llt().solve(grd);
+    if(!regularize)d = -(hess + mu0*MatrixXd::Identity(hess.rows(),hess.cols())).lu().solve(grd);
     //d = -(hess + mu0*MatrixXd::Identity(hess.rows(),hess.cols())).llt().solve(grd);
     }
     pred = 0.5*mu0*(d.transpose()*d).value()-0.5*(d.transpose()*grd).value();
-    if(pred<=(pmin*d.norm()*grd.norm())){ //sum(abs(grd))*sum(abs(d)))){#absolute norm
+    if(regularize && pred<=(pmin*d.norm()*grd.norm())){ //sum(abs(grd))*sum(abs(d)))){#absolute norm
       mu0 = std::max(sigma2*mu0, tolmu);
       }else{
         objnew = Rcpp::as<double>(fn(x+d));
@@ -205,10 +206,12 @@ Rcpp::List rnewton(const Eigen::VectorXd &x0,
           break;
         }
         rho = ared/pred;
-        if(std::isnan(rho) || rho<=c1){ // negative difference always goes here, unsucessful
+        if(regularize && (std::isnan(rho) || rho<=c1)){ // negative difference always goes here, unsucessful
+          //might want to consider a linesearch here if rho isnan to prevent getting stuck indefinitely
+          //although that will also cause a break with info 4 in a few iterations
           pass = false;
           mu0 = std::max(sigma2*mu0, tolmu);
-        }else  if(c1<rho & rho <= c2){ // somewhat succesful
+        }else if(!regularize || c1<rho & rho <= c2){ // somewhat succesful
           pass = true;
           firstpass = true;
           x = x+d;
@@ -219,15 +222,22 @@ Rcpp::List rnewton(const Eigen::VectorXd &x0,
           x = x+d;mu0 = std::max(sigma1*mu0, tolmu);
           obj = objnew;
         }
-        if(mu0>=tolmu2){
+        if(regularize && mu0>=tolmu2){
           info = 4;
           break;
         }
 
-        if(pass && verbose && (i % riter == 0)){
-          Rcpp::Rcout << "Iter: " << i << " Objective: " << std::fixed << std::setprecision(2) << obj << std::setprecision(4) << std::scientific << " Achieved reduction: " << ared << " mu: " << mu0  << std::scientific << std::endl;
+        if(verbose && pass){
+          arediter += ared;
+        }
+        if(regularize && pass && verbose && (i % riter == 0)){
+          Rcpp::Rcout << "Iter: " << i << " Objective: " << std::fixed << std::setprecision(2) << obj << std::setprecision(4) << std::scientific << " Achieved reduction: " << arediter << " mu: " << mu0  << std::scientific << std::endl;
+          arediter = 0;
+        }else if(!regularize && verbose && (i % riter == 0)){
+          Rcpp::Rcout << "Iter: " << i << " Objective: " << std::fixed << std::setprecision(2) << obj << std::setprecision(4) << std::scientific << " Achieved reduction: " << arediter << std::scientific << std::endl;
+          arediter = 0;
         }else if(verbose && (i % riter == 0)){
-          Rcpp::Rcout << "Iter: " << i << std::endl;
+          Rcpp::Rcout << "Iter: " << i << " No improvement" << std::endl;
         }
       }
       i++;
