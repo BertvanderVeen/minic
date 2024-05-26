@@ -5,7 +5,6 @@
 \usage{
 rnewton(x0, fn, gr,
   he = NULL,
-  regularize = TRUE,
   quasi = TRUE,
   method = "BFGS",
   verbose = FALSE,
@@ -24,11 +23,9 @@ rnewton(x0, fn, gr,
 
 \item{he}{A function that returns the hessian (only used when quasi = FALSE).}
 
-\item{regularize}{logical. Defaults to TRUE. Should regularization be implemented?}
-
 \item{quasi}{logical. Defaults to TRUE. If FALSE implements regularised Newton optimization.}
 
-\item{method}{The (limited-memory) method to be used when \code{quasi = TRUE}. Defaults to "BFGS", alternatives are "SR1" and "PSB".}
+\item{method}{The method to be used when \code{quasi = TRUE}. Defaults to "BFGS", alternatives are "BFGS", "SR1", "PSB" and their limited-memory counterparts LBFGS", "LSR1", "LPSB".}
 
 \item{verbose}{logical. Defaults to FALSE. If TRUE prints reports on each iteration.}
 

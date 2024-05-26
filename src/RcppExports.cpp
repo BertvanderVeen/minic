@@ -12,8 +12,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // rnewt
-Rcpp::List rnewt(const Eigen::VectorXd& x0, Rcpp::Function fn, Rcpp::Function gr, Rcpp::Function he, const Eigen::MatrixXd& gr0, const Eigen::MatrixXd& d0, const bool& regularize, const bool& quasi, const int& method, const int& maxit, const int& m, double& mu0, const double& sigma1, const double& sigma2, const double& c1, const double& c2, const double& pmin, const double& tolg, const double& tolgamma, const double& tolobj, const double& tolmu, const double& tolmu2, const double& tolc, const bool& verbose, const int& riter);
-RcppExport SEXP _rnewton_rnewt(SEXP x0SEXP, SEXP fnSEXP, SEXP grSEXP, SEXP heSEXP, SEXP gr0SEXP, SEXP d0SEXP, SEXP regularizeSEXP, SEXP quasiSEXP, SEXP methodSEXP, SEXP maxitSEXP, SEXP mSEXP, SEXP mu0SEXP, SEXP sigma1SEXP, SEXP sigma2SEXP, SEXP c1SEXP, SEXP c2SEXP, SEXP pminSEXP, SEXP tolgSEXP, SEXP tolgammaSEXP, SEXP tolobjSEXP, SEXP tolmuSEXP, SEXP tolmu2SEXP, SEXP tolcSEXP, SEXP verboseSEXP, SEXP riterSEXP) {
+Rcpp::List rnewt(const Eigen::VectorXd& x0, Rcpp::Function fn, Rcpp::Function gr, Rcpp::Function he, const Eigen::MatrixXd& gr0, const Eigen::MatrixXd& d0, const bool& quasi, const int& method, const int& maxit, const int& m, double& mu0, const double& sigma1, const double& sigma2, const double& c1, const double& c2, const double& pmin, const double& tolg, const double& tolgamma, const double& tolobj, const double& tolmu, const double& tolmu2, const double& tolc, const int& maxreject, const bool& verbose, const int& riter, const bool& returnhess);
+RcppExport SEXP _rnewton_rnewt(SEXP x0SEXP, SEXP fnSEXP, SEXP grSEXP, SEXP heSEXP, SEXP gr0SEXP, SEXP d0SEXP, SEXP quasiSEXP, SEXP methodSEXP, SEXP maxitSEXP, SEXP mSEXP, SEXP mu0SEXP, SEXP sigma1SEXP, SEXP sigma2SEXP, SEXP c1SEXP, SEXP c2SEXP, SEXP pminSEXP, SEXP tolgSEXP, SEXP tolgammaSEXP, SEXP tolobjSEXP, SEXP tolmuSEXP, SEXP tolmu2SEXP, SEXP tolcSEXP, SEXP maxrejectSEXP, SEXP verboseSEXP, SEXP riterSEXP, SEXP returnhessSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -23,7 +23,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::Function >::type he(heSEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type gr0(gr0SEXP);
     Rcpp::traits::input_parameter< const Eigen::MatrixXd& >::type d0(d0SEXP);
-    Rcpp::traits::input_parameter< const bool& >::type regularize(regularizeSEXP);
     Rcpp::traits::input_parameter< const bool& >::type quasi(quasiSEXP);
     Rcpp::traits::input_parameter< const int& >::type method(methodSEXP);
     Rcpp::traits::input_parameter< const int& >::type maxit(maxitSEXP);
@@ -40,15 +39,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double& >::type tolmu(tolmuSEXP);
     Rcpp::traits::input_parameter< const double& >::type tolmu2(tolmu2SEXP);
     Rcpp::traits::input_parameter< const double& >::type tolc(tolcSEXP);
+    Rcpp::traits::input_parameter< const int& >::type maxreject(maxrejectSEXP);
     Rcpp::traits::input_parameter< const bool& >::type verbose(verboseSEXP);
     Rcpp::traits::input_parameter< const int& >::type riter(riterSEXP);
-    rcpp_result_gen = Rcpp::wrap(rnewt(x0, fn, gr, he, gr0, d0, regularize, quasi, method, maxit, m, mu0, sigma1, sigma2, c1, c2, pmin, tolg, tolgamma, tolobj, tolmu, tolmu2, tolc, verbose, riter));
+    Rcpp::traits::input_parameter< const bool& >::type returnhess(returnhessSEXP);
+    rcpp_result_gen = Rcpp::wrap(rnewt(x0, fn, gr, he, gr0, d0, quasi, method, maxit, m, mu0, sigma1, sigma2, c1, c2, pmin, tolg, tolgamma, tolobj, tolmu, tolmu2, tolc, maxreject, verbose, riter, returnhess));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_rnewton_rnewt", (DL_FUNC) &_rnewton_rnewt, 25},
+    {"_rnewton_rnewt", (DL_FUNC) &_rnewton_rnewt, 26},
     {NULL, NULL, 0}
 };
 

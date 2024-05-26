@@ -1,6 +1,6 @@
 #'@export
 print.rnewton <- function(x, ...){
-  x$info <- switch(as.character(x$info), "1" = "1: gradient tolerance reached." , "2"= NA, "3"="3: insufficient improved in objective function (ran into tol.obj).", "4"="4: reached mu.tol2 (ran into regularisation parameter tolerance).", "5"="5: reached maximum interations.")
+  x$info <- switch(as.character(x$info), "1" = "1: gradient tolerance reached." , "2"= "2: maximum number of unsuccesful iterations reached.", "3"="3: insufficient improved in objective function (ran into tol.obj).", "4"="4: reached regularisation limit (ran into tol.mu2).", "5"="5: reached maximum interations.")
   cat(" Code", x$info, "\n")
   
   sts <- data.frame(c("Objective:", "Iterations:", "Evaluations:","max(|grad|):"), c(format(x$objective, nsmall=2,digits=2),x$iterations,x$evalg, signif(x$maxgr, 2)))
