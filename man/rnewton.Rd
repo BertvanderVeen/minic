@@ -29,7 +29,7 @@ rnewton(x0, fn, gr,
 
 \item{quasi}{logical. Defaults to TRUE. If FALSE implements regularised Newton optimization.}
 
-\item{method}{The method to be used when \code{quasi = TRUE}. Defaults to "LBFGS", alternatives are "LPSB", "LSR1" and ther full-memory alternatives "BFGS", "SR1", "PSB". The latter three options should probably not be used in practice (see details)}.
+\item{method}{The method to be used when \code{quasi = TRUE}. Defaults to "LBFGS", alternatives are "LPSB", "LSR1" and ther full-memory alternatives "BFGS", "SR1", "PSB". The latter three options should probably not be used in practice (see details).}
 
 \item{verbose}{logical. Defaults to FALSE. If TRUE prints reports on each iteration.}
 
