@@ -6,11 +6,13 @@
 rnewton(x0, fn, gr,
   he = NULL,
   quasi = TRUE,
-  method = "BFGS",
+  method = "LBFGS",
   verbose = FALSE,
-  control = list(maxit = 1000, m = 5, sigma1 = 0.5, sigma2 = 4, c1 = 0.001, c2 = 0.9,
-    pmin = 0.001, tol.g = 1e-08, tol.gamma = 1e-05, tol.obj = 1e-08, tol.mu = 1e-04,
-    tol.mu2 = 1e+15, tol.c = 1e-08),
+  return.hess = FALSE,
+  control = list(maxit = 1000, m = 5, sigma1 = 0.5, sigma2 = 4, c1 = 0.001,
+    c2 = 0.9, pmin = 0.001, tol.g = 1e-08, tol.gamma = 1e-05, tol.obj = 1e-08, 
+    tol.mu = 1e-04, tol.mu2 = 1e+15, tol.c = 1e-08, report.iter = 10, 
+    grad.reject = TRUE, max.reject = 50),
   ...
 )
 }
@@ -25,7 +27,7 @@ rnewton(x0, fn, gr,
 
 \item{quasi}{logical. Defaults to TRUE. If FALSE implements regularised Newton optimization.}
 
-\item{method}{The method to be used when \code{quasi = TRUE}. Defaults to "BFGS", alternatives are "BFGS", "SR1", "PSB" and their limited-memory counterparts LBFGS", "LSR1", "LPSB".}
+\item{method}{The method to be used when \code{quasi = TRUE}. Defaults to "LBFGS", alternatives are "LPSB", "LSR1" and ther full-memory alternatives "BFGS", "SR1", "PSB". The latter three options should probably not be used in practice (see details)}.
 
 \item{verbose}{logical. Defaults to FALSE. If TRUE prints reports on each iteration.}
 
@@ -45,6 +47,8 @@ rnewton(x0, fn, gr,
  \item{\emph{tol.mu2}: }{ Maximum threshold for the regularisation parameter. Defaults to 1e15.}
  \item{\emph{tol.c}: }{ Tolerance for cautious updating. Defaults to 1e-8.}
  \item{\emph{report.iter}: }{ If 'verbose = TRUE', how often should a report be printed? Defaults to every 10 iterations.}
+ \item{\emph{max.reject}: }{ Maximum number of consecutive rejections before algorithm terminates.}
+ \item{\emph{grad.reject}: }{ Logical. If TRUE the gradient is evaluated at every iteration and information of rejected steps is incorporated in limited-memory methods. Defaults to TRUE.}
 }}
 
 \item{...}{Not used.}
@@ -62,11 +66,12 @@ An object of class "rnewton" including the following components:
 }
 }
 \description{
-Performs regularized (quasi-)Newton optimisation with BFGS, SR1, or PSB updates.
+Performs regularized (quasi-)Newton optimisation with limited-memory BFGS, SR1, or PSB updates.
 }
 \details{
-This function implements some of the regularised (quasi-)Newton optimisation methods presented in Kanzow and Steck (2023).
-All quasi-Newton methods implemented are of the limited-memory kind. The function start with a single More-Thuente line search along the normalized negative gradient direction. 
+This function implements some of the regularised (quasi-)Newton optimisation methods presented in Kanzow and Steck (2023) with one modification; gradient information of rejected steps is incorporated by default. The full-memory options that are implemented rely on explicitly inverting the approximated Hessian and regularisation penalty, are thus slow, and should probably not be used in practice. 
+
+The function start with a single More-Thuente line search along the normalized negative gradient direction. 
 The code for this was originally written in matlab by Burdakov et al. (2017), translated to python by Kanzow and Steck (2023), and separately translated to R code for this package. 
 
 A step is considered somewhat successful for \eqn{c_1<\rho\leq c_2}, where \eqn{\rho} is the proportion of achieved and predicted reduction in the objective function. Note the requirement \eqn{c_1 \in (0,1)} and \eqn{c_2 \in (c_1,1)}.

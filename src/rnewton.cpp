@@ -38,6 +38,7 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
                    const double &tolmu2,
                    const double &tolc,
                    const int &maxreject,
+                   const bool &grdre,
                    const bool &verbose,
                    const int &riter,
                    const bool &returnhess
@@ -94,7 +95,9 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
       Rcpp::checkUserInterrupt();
     }
     
-    if(pass){
+    //if(pass){
+    if(quasi && grdre || pass){
+      //incorporate rejection information for limited memory
       grdold = grd;
       grd = Rcpp::as<VectorXd>(gr(x));
       griter++;
@@ -102,7 +105,7 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
         info = 1;
         break;
       }
-      
+    }
       if(quasi){
         //tol2: cautious updating(see eq23)
         y = grd-grdold;
@@ -110,23 +113,28 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
         
         newgamma = (y.transpose()*y).value()/sy;
         gamma = std::min(1/tolgamma, newgamma);
+        // newgamma = sy/y.squaredNorm();//doesnt quite work, need to check how this echos into Q
+        // gamma = std::min(1/tolgamma, newgamma/(1+newgamma));
         
         if((sy>=(tolc*d.squaredNorm()) || !firstpass) && (method == 1| method == 2| method ==3)){
           //limited memory matrices
           if(si == s){
-          // max memory: matrices are full
-          Y.leftCols(s-1) = Y.rightCols(s-1); //first s columns
-          Y.col(s-1) = y; //last column
-          S.leftCols(s-1) = S.rightCols(s-1);
-          S.col(s-1) = d;
+            // max memory: matrices are full
+            Y.leftCols(s-1) = Y.rightCols(s-1); //first s columns
+            Y.col(s-1) = y; //last column
+            S.leftCols(s-1) = S.rightCols(s-1);
+            S.col(s-1) = d;
           }else{
-          Y.col(si) = y;
-          S.col(si) = d;
-          si++;
+            Y.col(si) = y;
+            S.col(si) = d;
+            si++;
           }
           // newgamma = (y.transpose()*y).value()/sy;
           // gamma = std::min(1/tolgamma, newgamma);
         }
+      }
+      
+      if(quasi && pass){
         //not convinced i should be cautiously updating gamma.
 
         if(!std::isnan(rho)){
@@ -193,6 +201,8 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
         //full hessian approximation
          if(i==1)hess.diagonal().array() *= newgamma;
          if(method == 4){
+          //dhessd = -d*grd
+          //due to secant condition dhess = -grad
           hess += ((y*y.transpose()).array()/sy - ((hess*d)*(d.transpose()*hess.transpose())).array()/(d.transpose()*hess*d).sum()).matrix(); //update hessian
         }else if(method == 5){
           MatrixXd yBs = (y-hess*d);
@@ -205,7 +215,7 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
     }
     }
     }
-    }
+    
     if(quasi && method <4){
       // p = (Q+pow(gamma+mu0,-1)*A.transpose()*A).lu().solve(A.transpose()*grd);
       d = -pow(gamma+mu0, -1)*grd + pow(gamma+mu0, -2)*A*(Q+pow(gamma+mu0,-1)*A.transpose()*A).lu().solve(A.transpose()*grd);  

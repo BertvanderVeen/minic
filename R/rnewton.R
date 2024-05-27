@@ -6,7 +6,7 @@
 #' @param gr A function that returns the gradient.
 #' @param he A function that returns the hessian (only used when quasi = FALSE).
 #' @param quasi logical. Defaults to TRUE. If FALSE implements regularised Newton optimization.
-#' @param method The method to be used when \code{quasi = TRUE}. Defaults to "BFGS", alternatives are "BFGS", "SR1", "PSB" and their limited-memory counterparts LBFGS", "LSR1", "LPSB".
+#' @param method The method to be used when \code{quasi = TRUE}. Defaults to "LBFGS", alternatives are "LPSB", "LSR1" and ther full-memory alternatives "BFGS", "SR1", "PSB". The latter three options should probably not be used in practice (see details).
 #' @param verbose logical. Defaults to FALSE. If TRUE prints reports on each iteration.
 #' @param return.hess logical. Defaults to FALSE. If TRUE prints returns the (approximated for quasi-Newton methods) Hessian.
 #' @param control a \code{"\link{list}"} of control constants.
@@ -25,13 +25,15 @@
 #'  \item{\emph{tol.mu2}: }{ Maximum threshold for the regularisation parameter. Defaults to 1e15.}
 #'  \item{\emph{tol.c}: }{ Tolerance for cautious updating. Defaults to 1e-8.}
 #'  \item{\emph{report.iter}: }{ If 'verbose = TRUE', how often should a report be printed? Defaults to every 10 iterations.}
-#'  #'  \item{\emph{max.reject}: }{ Maximum number of consecutive rejections before algorithm terminates.}
+#'  \item{\emph{max.reject}: }{ Maximum number of consecutive rejections before algorithm terminates.}
+#'  \item{\emph{grad.reject}: }{ Logical. If TRUE the gradient is evaluated at every iteration and information of rejected steps is incorporated in limited-memory methods. Defaults to TRUE.}
 #' }
 #' @param ... Not used.
 #'
 #' @details
-#' This function implements some of the regularised (quasi-)Newton optimisation methods presented in Kanzow and Steck (2023).
-#' All quasi-Newton methods implemented also have a limited-memory version. The function start with a single More-Thuente line search along the normalized negative gradient direction. 
+#' This function implements some of the regularised (quasi-)Newton optimisation methods presented in Kanzow and Steck (2023). The full-memory options that are implemented rely on explicitly inverting the approximated Hessian and regularisation penalty, are thus slow, and should probably not be used in practice.
+#' 
+#' The function start with a single More-Thuente line search along the normalized negative gradient direction. 
 #' The code for this was originally written in matlab by Burdakov et al. (2017), translated to python by Kanzow and Steck (2023), and separately translated to R code for this package. 
 #' 
 #' A step is considered somewhat successful for \eqn{c_1<\rho\leq c_2}, where \eqn{\rho} is the proportion of achieved and predicted reduction in the objective function. Note the requirement \eqn{c_1 \in (0,1)} and \eqn{c_2 \in (c_1,1)}.
@@ -64,7 +66,7 @@
 #' @exportPattern "^[[:alpha:]]+"
 #' 
 rnewton <-function(x0, fn, gr, he = NULL, 
-                  quasi = TRUE, method = "BFGS", verbose = FALSE, return.hess = FALSE, control = list(maxit = 1e3, m = 5, sigma1 = 0.5, sigma2 = 4, c1 = 1e-3, c2 = 0.9, pmin = 1e-3, tol.g = 1e-8, tol.gamma = 1e-5, tol.obj = 1e-8, tol.mu = 1e-4, tol.mu2 = 1e15, tol.c = 1e-8, report.iter = 10, max.reject = 50, mu0 = 1), ...){
+                  quasi = TRUE, method = "LBFGS", verbose = FALSE, return.hess = FALSE, control = list(maxit = 1e3, m = 5, sigma1 = 0.5, sigma2 = 4, c1 = 1e-3, c2 = 0.9, pmin = 1e-3, tol.g = 1e-8, tol.gamma = 1e-5, tol.obj = 1e-8, tol.mu = 1e-4, tol.mu2 = 1e15, tol.c = 1e-8, report.iter = 10, grad.reject = TRUE, max.reject = 50, mu0 = 5), ...){
   
   if(!quasi && is.null(he))stop("Function for hessian must be provided with 'quasi = FALSE'")
   
@@ -99,14 +101,16 @@ rnewton <-function(x0, fn, gr, he = NULL,
     x$report.iter = 10
   if (!("max.reject"%in% names(x)))
     x$max.reject = 50
+  if (!("grad.reject"%in% names(x)))
+    x$grad.reject = TRUE
   if (!("mu0"%in% names(x)))
-    x$mu0 = 1
+    x$mu0 = 5
   x
 }
 
 control <- fill_control(control)
 
-maxit = control$maxit;m=control$m;sigma1=control$sigma1;sigma2=control$sigma2;c1=control$c1;pmin=control$pmin;c2=control$c2;tol.g=control$tol.g;tol.gamma=control$tol.gamma;tol.obj=control$tol.obj;tol.mu=control$tol.mu;tol.mu2=control$tol.mu2;tol.c=control$tol.c;report.iter=control$report.iter;max.reject=control$max.reject;mu0=control$mu0
+maxit = control$maxit;m=control$m;sigma1=control$sigma1;sigma2=control$sigma2;c1=control$c1;pmin=control$pmin;c2=control$c2;tol.g=control$tol.g;tol.gamma=control$tol.gamma;tol.obj=control$tol.obj;tol.mu=control$tol.mu;tol.mu2=control$tol.mu2;tol.c=control$tol.c;report.iter=control$report.iter;max.reject=control$max.reject;grad.reject=control$grad.reject;mu0=control$mu0
 
 # Defensive programming for tolerances
 if(pmin>1|pmin<0)stop("pmin must be between 0 and 1.")
@@ -136,7 +140,7 @@ if(inherits(lerr,"try-error")){
 
 if(quasi)he <- function()matrix(0)
   
-system.time(opt <- rnewt(x0=pars, fn=fn, gr=gr, he=he, gr0=t(grdold), d0=d, quasi=quasi, method = method, maxit = maxit, m = m, mu0 = mu0, sigma1 = sigma1, sigma2 = sigma2, c1 = c1, c2 = c2, pmin = pmin, tolg = tol.g, tolgamma = tol.gamma, tolobj = tol.obj, tolmu = tol.mu, tolmu2 = tol.mu2, tolc = tol.c , verbose = verbose, riter = report.iter, maxreject = max.reject, returnhess = return.hess))
+system.time(opt <- rnewt(x0=pars, fn=fn, gr=gr, he=he, gr0=t(grdold), d0=d, quasi=quasi, method = method, maxit = maxit, m = m, mu0 = mu0, sigma1 = sigma1, sigma2 = sigma2, c1 = c1, c2 = c2, pmin = pmin, tolg = tol.g, tolgamma = tol.gamma, tolobj = tol.obj, tolmu = tol.mu, tolmu2 = tol.mu2, tolc = tol.c , verbose = verbose, riter = report.iter, maxreject = max.reject, grdre = grad.reject, returnhess = return.hess))
 
 opt$par <- c(opt$par)
 if(!is.null(names(x0))) names(opt$par) <- names(x0)
