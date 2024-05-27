@@ -3,3 +3,4 @@ This package implements general-purpose regularized quasi-Newton optimisation ro
 
 ## References
 Kanzow, C., & Steck, D. (2023). Regularization of limited memory quasi-Newton methods for large-scale nonconvex minimization. Mathematical Programming Computation, 15(3), 417-444.
+Sugimoto, S., & Yamashita, N. (2014). A regularized limited-memory BFGS method for unconstrained minimization problems. inf. téc.
