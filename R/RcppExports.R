@@ -2,6 +2,6 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 rnewt <- function(x0, fn, gr, he, gr0, d0, quasi, method, maxit, m, mu0, sigma1, sigma2, c1, c2, pmin, tolg, tolgamma, tolobj, tolmu, tolmu2, tolc, maxreject, grdre, verbose, riter, returnhess) {
-    .Call('_rnewton_rnewt', PACKAGE = 'rnewton', x0, fn, gr, he, gr0, d0, quasi, method, maxit, m, mu0, sigma1, sigma2, c1, c2, pmin, tolg, tolgamma, tolobj, tolmu, tolmu2, tolc, maxreject, grdre, verbose, riter, returnhess)
+    .Call('_rnewt_rnewt', PACKAGE = 'rnewt', x0, fn, gr, he, gr0, d0, quasi, method, maxit, m, mu0, sigma1, sigma2, c1, c2, pmin, tolg, tolgamma, tolobj, tolmu, tolmu2, tolc, maxreject, grdre, verbose, riter, returnhess)
 }
 

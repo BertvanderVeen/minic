@@ -60,7 +60,7 @@
 #' Kanzow, C., & Steck, D. (2023). Regularization of limited memory quasi-Newton methods for large-scale nonconvex minimization. Mathematical Programming Computation, 15(3), 417-444.
 #'
 #'@aliases rnewt rnewton
-#' @useDynLib rnewton
+#' @useDynLib rnewt
 #' @export
 #' @importFrom Rcpp evalCpp
 #' @exportPattern "^[[:alpha:]]+"

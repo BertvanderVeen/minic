@@ -1,8 +1,8 @@
-Package: rnewton
+Package: rnewt
 Type: Package
 Title: Regularized quasi-Newton optimisation
 Version: 1.0
-Date: 2024-05-19
+Date: 2024-05-27
 Author: Bert van der Veen
 Maintainer: Bert van der Veen <bert_van_der_veen@hotmail.com>
 License: GPL (>= 2)
