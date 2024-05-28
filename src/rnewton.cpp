@@ -230,7 +230,8 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
     pred = 0.5*mu0*(d.transpose()*d).value()-0.5*(d.transpose()*grd).value();
     if(pred<=(pmin*d.norm()*grd.norm())){ //sum(abs(grd))*sum(abs(d)))){#absolute norm
       mu0 = std::max(sigma2*mu0, tolmu);
-      reject ++ ;
+      pass = false;
+      reject ++;
       }else{
         objnew = Rcpp::as<double>(fn(x+d));
         ared = obj-objnew; // actual improvement
@@ -239,6 +240,7 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
           info = 3;
           break;
         }
+
         rho = ared/pred;
         if((std::isnan(rho) || rho<=c1)){ // reject, no improvement
           reject++;
@@ -266,6 +268,8 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
         if(mu0>=tolmu2){
           info = 4;
           break;
+          // could try something radical and set mu=m0, if we dont get out on the second try we can still break
+          
         }
 
         if(verbose && pass){
@@ -274,9 +278,11 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
         if(pass && verbose && (i % riter == 0)){
           Rcpp::Rcout << "Iter: " << i << " Objective: " << std::fixed << std::setprecision(2) << obj << std::setprecision(4) << std::scientific << " Achieved reduction: " << arediter << " mu: " << mu0  << std::scientific << std::endl;
           arediter = 0;
-        }else if(verbose && (i % riter == 0)){
-          Rcpp::Rcout << "Iter: " << i << " No improvement" << std::endl;
         }
+      }
+      
+      if(!pass && verbose && (i % riter == 0)){
+        Rcpp::Rcout << "Iter: " << i << " No improvement" << std::endl;
       }
       }
   double grmax = grd.cwiseAbs().maxCoeff();
