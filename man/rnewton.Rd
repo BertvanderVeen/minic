@@ -37,30 +37,30 @@ rnewton(x0, fn, gr,
 
 \item{control}{a \code{"\link{list}"} of control options.
 \itemize{
- \item{\emph{maxit}: }{ The maximum number of iterations. Defaults to 1000.}
- \item{\emph{m}: }{ The number of gradients to remember from previous optimisation steps. Defaults to 5.}  
- \item{\emph{sigma1}: }{ Step decrement factor. Defaults to 0.5. Must be smaller than 1 but larger than 0.}
- \item{\emph{sigma2}: }{ Step increment factor. Defaults to 4. Must be larger than 1.}
- \item{\emph{c1}: }{ First constant for determining step success. Defaults to 1e-3. See details.}
- \item{\emph{c2}: }{ Second constant for determining step success. Defaults to 0.9. See details.}
- \item{\emph{pmin}: }{ Third constant for determining (lack of) step success. Defaults to 1e-3.}
- \item{\emph{tol.g}: }{ Convergence tolerance for gradient. Defaults to 1e-8.}
- \item{\emph{tol.gamma}: }{ Threshold for gamma paramter. Defaults to 1e-5.}
- \item{\emph{tol.obj}: }{ Convergence tolerance for relative reduction in the objective, similar to "reltol" in \code{"\link{optim}"}. Defaults to 1e-8.}
- \item{\emph{tol.mu}: }{ Minimum threshold for the regularisation parameter. Defaults to 1e-4.}
- \item{\emph{tol.mu2}: }{ Maximum threshold for the regularisation parameter. Defaults to 1e15.}
- \item{\emph{tol.c}: }{ Tolerance for cautious updating. Defaults to 1e-8.}
- \item{\emph{report.iter}: }{ If 'verbose = TRUE', how often should a report be printed? Defaults to every 10 iterations.}
- \item{\emph{max.reject}: }{ Maximum number of consecutive rejections before algorithm terminates.}
- \item{\emph{grad.reject}: }{ Logical. If TRUE the gradient is evaluated at every iteration and information of rejected steps is incorporated in limited-memory methods. Defaults to FALSE.}
- \item{\emph{mu0.reject}: }{ Initial value of the regularisation parameter. Defaults to 5.}
+ \item \emph{maxit}: The maximum number of iterations. Defaults to 1000.
+ \item \emph{m}: The number of gradients to remember from previous optimisation steps. Defaults to 5.
+ \item \emph{sigma1}: Step decrement factor. Defaults to 0.5. Must be smaller than 1 but larger than 0.
+ \item \emph{sigma2}: Step increment factor. Defaults to 4. Must be larger than 1.
+ \item \emph{c1}: First constant for determining step success. Defaults to 1e-3. See details.
+ \item \emph{c2}: Second constant for determining step success. Defaults to 0.9. See details.
+ \item \emph{pmin}: Third constant for determining (lack of) step success. Defaults to 1e-3.
+ \item \emph{tol.g}: Convergence tolerance for gradient. Defaults to 1e-8.
+ \item \emph{tol.gamma}: Threshold for gamma paramter. Defaults to 1e-5.
+ \item \emph{tol.obj}: Convergence tolerance for relative reduction in the objective, similar to "reltol" in \code{"\link{optim}"}. Defaults to 1e-8.
+ \item \emph{tol.mu}: Minimum threshold for the regularisation parameter. Defaults to 1e-4.
+ \item \emph{tol.mu2}: Maximum threshold for the regularisation parameter. Defaults to 1e15.
+ \item \emph{tol.c}: Tolerance for cautious updating. Defaults to 1e-8.
+ \item \emph{report.iter}: If 'verbose = TRUE', how often should a report be printed? Defaults to every 10 iterations.
+ \item \emph{max.reject}: Maximum number of consecutive rejections before algorithm terminates.
+ \item \emph{grad.reject}: Logical. If TRUE the gradient is evaluated at every iteration and information of rejected steps is incorporated in limited-memory methods. Defaults to FALSE.
+ \item \emph{mu0.reject}: Initial value of the regularisation parameter. Defaults to 5.
 }}
 
 \item{...}{Not used.}
 }
 \value{
 An object of class "rnewton" including the following components:
-\itemize{
+
  \item{objective: }{ The value of fn corresponding to par.}
  \item{iterations: }{ Number of completed iterations.}
  \item{evalg: }{ Number of calls to gr.}
@@ -68,7 +68,6 @@ An object of class "rnewton" including the following components:
  \item{info: }{ Convergence code.}
  \item{maxgr: }{ Maximum absolute gradient component.}
  \item{convergence: }{ logical, TRUE indicating succesful convergence (reached tol.obj or tol.g).}
-}
 }
 \description{
 Performs regularized (quasi-)Newton optimisation with limited-memory BFGS, SR1, or PSB updates.
