@@ -1,4 +1,4 @@
 S3method(print,rnewton)
 export(rnewton)
 importFrom(Rcpp,evalCpp)
-useDynLib(optic)
+useDynLib(minic)
