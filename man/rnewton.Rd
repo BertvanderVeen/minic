@@ -14,7 +14,7 @@ rnewton(x0, fn, gr,
   control = list(maxit = 1000, m = 5, sigma1 = 0.5, sigma2 = 4, c1 = 0.001,
     c2 = 0.9, pmin = 0.001, tol.g = 1e-08, tol.gamma = 1e-05, tol.obj = 1e-08, 
     tol.mu = 1e-04, tol.mu2 = 1e+15, tol.c = 1e-08, report.iter = 10, 
-    grad.reject = TRUE, max.reject = 50),
+    grad.reject = FALSE, max.reject = 50),
   ...
 )
 }
@@ -44,13 +44,13 @@ rnewton(x0, fn, gr,
  \item{\emph{pmin}: }{ Third constant for determining (lack of) step success. Defaults to 1e-3.}
  \item{\emph{tol.g}: }{ Convergence tolerance for gradient. Defaults to 1e-8.}
  \item{\emph{tol.gamma}: }{ Threshold for gamma paramter. Defaults to 1e-5.}
- \item{\emph{tol.obj}: }{ Convergence tolerance for reduction in the objective, similar to "reltol" in \code{"\link{optim}"}. Defaults to 1e-8.}
+ \item{\emph{tol.obj}: }{ Convergence tolerance for relative reduction in the objective, similar to "reltol" in \code{"\link{optim}"}. Defaults to 1e-8.}
  \item{\emph{tol.mu}: }{ Minimum threshold for the regularisation parameter. Defaults to 1e-4.}
  \item{\emph{tol.mu2}: }{ Maximum threshold for the regularisation parameter. Defaults to 1e15.}
  \item{\emph{tol.c}: }{ Tolerance for cautious updating. Defaults to 1e-8.}
  \item{\emph{report.iter}: }{ If 'verbose = TRUE', how often should a report be printed? Defaults to every 10 iterations.}
  \item{\emph{max.reject}: }{ Maximum number of consecutive rejections before algorithm terminates.}
- \item{\emph{grad.reject}: }{ Logical. If TRUE the gradient is evaluated at every iteration and information of rejected steps is incorporated in limited-memory methods. Defaults to TRUE.}
+ \item{\emph{grad.reject}: }{ Logical. If TRUE the gradient is evaluated at every iteration and information of rejected steps is incorporated in limited-memory methods. Defaults to FALSE.}
 }}
 
 \item{...}{Not used.}

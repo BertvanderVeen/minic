@@ -1,6 +1,6 @@
-Package: rnewt
+Package: optic
 Type: Package
-Title: Regularized quasi-Newton optimisation
+Title: Optimization for ill-conditioned problems
 Version: 1.0
 Date: 2024-05-27
 Author: Bert van der Veen
@@ -10,3 +10,5 @@ Encoding: UTF-8
 RoxygenNote: 7.3.1
 Imports: Rcpp (>= 1.0.12)
 LinkingTo: Rcpp, RcppEigen
+URL: https://github.com/BertvanderVeen/rnewt
+BugReports: https://github.com/BertvanderVeen/rnewt/issues

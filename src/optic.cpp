@@ -236,7 +236,7 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
         objnew = Rcpp::as<double>(fn(x+d));
         ared = obj-objnew; // actual improvement
         
-        if(ared<=tolobj && ared>0){
+        if((ared)/std::max(1., abs(obj))<=tolobj && ared>0){
           info = 3;
           break;
         }
