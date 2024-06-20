@@ -14,7 +14,7 @@ rnewton(x0, fn, gr,
   control = list(maxit = 1000, m = 5, sigma1 = 0.5, sigma2 = 4, c1 = 0.001,
     c2 = 0.9, pmin = 0.001, tol.g = 1e-08, tol.gamma = 1e-05, tol.obj = 1e-08, 
     tol.mu = 1e-04, tol.mu2 = 1e+15, tol.c = 1e-08, report.iter = 10, 
-    grad.reject = FALSE, max.reject = 50),
+    grad.reject = FALSE, max.reject = 50, mu0 = 5),
   ...
 )
 }
@@ -33,7 +33,9 @@ rnewton(x0, fn, gr,
 
 \item{verbose}{logical. Defaults to FALSE. If TRUE prints reports on each iteration.}
 
-\item{control}{a \code{"\link{list}"} of control constants.
+\item{return.hess}{logical. Defaults to FALSE. If TRUE returns (approximation of) the hessian at the final iteration.}
+
+\item{control}{a \code{"\link{list}"} of control options.
 \itemize{
  \item{\emph{maxit}: }{ The maximum number of iterations. Defaults to 1000.}
  \item{\emph{m}: }{ The number of gradients to remember from previous optimisation steps. Defaults to 5.}  
@@ -51,6 +53,7 @@ rnewton(x0, fn, gr,
  \item{\emph{report.iter}: }{ If 'verbose = TRUE', how often should a report be printed? Defaults to every 10 iterations.}
  \item{\emph{max.reject}: }{ Maximum number of consecutive rejections before algorithm terminates.}
  \item{\emph{grad.reject}: }{ Logical. If TRUE the gradient is evaluated at every iteration and information of rejected steps is incorporated in limited-memory methods. Defaults to FALSE.}
+ \item{\emph{mu0.reject}: }{ Initial value of the regularisation parameter. Defaults to 5.}
 }}
 
 \item{...}{Not used.}
@@ -62,7 +65,7 @@ An object of class "rnewton" including the following components:
  \item{iterations: }{ Number of completed iterations.}
  \item{evalg: }{ Number of calls to gr.}
  \item{par: }{ The best set of parameters found.}
- \item{info: }{ Convergence code. See \code{"\link{print.rnewton}"} for details.}
+ \item{info: }{ Convergence code.}
  \item{maxgr: }{ Maximum absolute gradient component.}
  \item{convergence: }{ logical, TRUE indicating succesful convergence (reached tol.obj or tol.g).}
 }

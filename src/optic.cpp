@@ -296,7 +296,7 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
                               Rcpp::Named("info")=Rcpp::wrap(info),
                               Rcpp::Named("maxgr")=Rcpp::wrap(grmax)
     );
-  }else if(returnhess){
+  }else{
     if(quasi && (method == 1 | method == 2 | method == 3)){
     if(verbose)Rcpp::Rcout << "Calculating hessian..." << std::endl;
     hess = gamma*MatrixXd::Identity(x.rows(),x.rows()) + A*Q.lu().solve(A.transpose());
