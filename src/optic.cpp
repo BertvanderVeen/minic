@@ -74,7 +74,7 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
   double gamma = 1;double newgamma = 0;
   int s = 0;
   double rho = 1;
-  if(method == 1 || method == 3)s = 2*m;
+  if((method == 1) || (method == 3))s = 2*m;
   if(method == 2)s = m;
   int si = 0;
   MatrixXd Y(x0.rows(), s);Y.setZero(); //diff in grd. of updates
@@ -116,7 +116,7 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
         // newgamma = sy/y.squaredNorm();//doesnt quite work, need to check how this echos into Q
         // gamma = std::min(1/tolgamma, newgamma/(1+newgamma));
         
-        if((sy>=(tolc*d.squaredNorm()) || !firstpass) && (method == 1| method == 2| method ==3)){
+        if((sy>=(tolc*d.squaredNorm()) || !firstpass) && ((method == 1)| (method == 2)| (method ==3))){
           //limited memory matrices
           if(si == s){
             // max memory: matrices are full
@@ -139,7 +139,7 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
 
         if(!std::isnan(rho)){
         
-        if(method == 1| method == 2| method ==3){
+        if((method == 1)| (method == 2)| (method ==3)){
           //limited memory updates
         
           if(si<=s && SY.cols()<s){
@@ -197,7 +197,7 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
             Q.topRightCorner(si,si) = U;
             Q.bottomRightCorner(si,si) = D.toDenseMatrix()+gamma*StS.diagonal().asDiagonal().toDenseMatrix()+L+L.transpose();
            }
-      }else if(method == 4 | method == 5 | method == 6){
+        }else if((method == 4) | (method == 5) | (method == 6)){
         //full hessian approximation
          if(i==1)hess.diagonal().array() *= newgamma;
          if(method == 4){
@@ -252,7 +252,7 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
           //although that will also cause a break with info 4 in a few iterations
           pass = false;
           mu0 = std::max(sigma2*mu0, tolmu);
-        }else if(c1<rho & rho <= c2){ // accept, somewhat succesful updates, might also want to go here if sufficien reduction in gradient (see TMB's newton)
+        }else if((c1<rho) & (rho <= c2)){ // accept, somewhat succesful updates, might also want to go here if sufficien reduction in gradient (see TMB's newton)
           //might want to check if we can take a longer step here to prevent excess iterations.
           pass = true;reject=0;
           firstpass = true;
@@ -297,7 +297,7 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
                               Rcpp::Named("maxgr")=Rcpp::wrap(grmax)
     );
   }else{
-    if(quasi && (method == 1 | method == 2 | method == 3)){
+    if(quasi && ((method == 1) | (method == 2) | (method == 3))){
     if(verbose)Rcpp::Rcout << "Calculating hessian..." << std::endl;
     hess = gamma*MatrixXd::Identity(x.rows(),x.rows()) + A*Q.lu().solve(A.transpose());
     }
