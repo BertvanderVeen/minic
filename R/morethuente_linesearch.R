@@ -1,6 +1,19 @@
+# MIT License
+# 
+# Copyright (c) 2020 dmsteck
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#   
+#   The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+
 # script translted from the python code in https://github.com/dmsteck/paper-regularized-qn-benchmark/blob/d6777fa872bebcc38ebe2d7aa9dc21862d3b7ffd/utility/morethuente.py#L4
 # and they translated it from the matlab code associated with: O’Leary, D.: A Matlab implementation of a MINPACK line search algorithm by Jorge J. Moré and David J. Thuente (1991).
-#function [x,f,g,stp,info,nfev] ...
 cvsrch <- function(fn, gr, n, x, f, g, s, stp, ftol, gtol, xtol, stpmin, stpmax, maxfev){
 p5 = .5
 p66 = .66
