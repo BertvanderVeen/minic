@@ -89,6 +89,24 @@ Burdakov, O., Gong, L., Zikrin, S., & Yuan, Y. X. (2017). On efficiently combini
 
 Kanzow, C., & Steck, D. (2023). Regularization of limited memory quasi-Newton methods for large-scale nonconvex minimization. Mathematical Programming Computation, 15(3), 417-444.
 }
+\examples{
+# Powell's quartic function
+fn <- function(x) {
+  (x[1] + 10*x[2])^2 + 5 * (x[3] - x[4])^2 + 
+  (x[2] - 2*x[3])^4 + 10 * (x[1] - x[4])^4
+}
+
+# Gradient
+gr <- function(x) {
+  c(2 * (x[1] + 10*x[2]) + 40 * (x[1] - x[4])^3,    # dfdx1
+    20 * (x[1] + 10*x[2]) + 4 * (x[2] - 2 * x[3])^3,# dfdx2
+    10 * (x[3] - x[4]) - 8 * (x[2] - 2*x[3])^3,     # dfdx3
+    -(10 * (x[3] - x[4]) + 40 * (x[1] - x[4])^3))   # dfdx4
+}
+
+# Lower tolerances from default
+rnewton(c(1, 1, 1, 1), fn, gr, control = list(mu0 = 1, tol.g = 1e-10, tol.obj = 0))
+}
 \author{
 Bert van der Veen
 }
