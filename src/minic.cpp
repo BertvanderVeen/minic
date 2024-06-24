@@ -111,12 +111,14 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
         y = grd-grdold;
         sy = (y.transpose()*d).value();
         
-        newgamma = (y.transpose()*y).value()/sy;
-        gamma = std::min(1/tolgamma, newgamma);
+        // newgamma = (y.transpose()*y).value()/sy;
+        // gamma = std::min(1/tolgamma, newgamma);
         // newgamma = sy/y.squaredNorm();//doesnt quite work, need to check how this echos into Q
         // gamma = std::min(1/tolgamma, newgamma/(1+newgamma));
         
-        if((sy>=(tolc*d.squaredNorm()) || !firstpass) && ((method == 1)| (method == 2)| (method ==3))){
+        if(((method == 1)| (method == 2)| (method ==3))){
+          
+          if(!firstpass || ((method == 2) | (method == 3)) | ((method == 1) && (sy>=(tolc*d.squaredNorm())))){
           //limited memory matrices
           if(si == s){
             // max memory: matrices are full
@@ -129,8 +131,11 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
             S.col(si) = d;
             si++;
           }
-          // newgamma = (y.transpose()*y).value()/sy;
-          // gamma = std::min(1/tolgamma, newgamma);
+        }
+          if(sy>=(tolc*d.squaredNorm())){
+          newgamma = (y.transpose()*y).value()/sy;
+          gamma = std::min(1/tolgamma, newgamma);
+        }
         }
       }
       
@@ -236,7 +241,11 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
         objnew = Rcpp::as<double>(fn(x+d));
         ared = obj-objnew; // actual improvement
         
-        if((ared)/std::max(1., abs(obj))<=tolobj && ared>0){
+        // if((ared)/std::max(1., abs(obj))<=tolobj && ared>0){
+        //   info = 3;
+        //   break;
+        // }
+        if(ared<=tolobj){
           info = 3;
           break;
         }
