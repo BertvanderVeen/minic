@@ -245,7 +245,7 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
         //   info = 3;
         //   break;
         // }
-        if(ared<=tolobj){
+        if(abs(ared)<=tolobj){
           info = 3;
           break;
         }
