@@ -46,7 +46,7 @@ rnewton(x0, fn, gr,
  \item \emph{pmin}: Third constant for determining (lack of) step success. Defaults to 1e-3.
  \item \emph{tol.g}: Convergence tolerance for gradient. Defaults to 1e-8.
  \item \emph{tol.gamma}: Threshold for gamma paramter. Defaults to 1e-5.
- \item \emph{tol.obj}: Convergence tolerance for relative reduction in the objective, similar to "reltol" in \code{"\link{optim}"}. Defaults to 1e-8.
+ \item \emph{tol.obj}: Convergence tolerance for reduction in the objective. Defaults to 1e-8.
  \item \emph{tol.mu}: Minimum threshold for the regularisation parameter. Defaults to 1e-4.
  \item \emph{tol.mu2}: Maximum threshold for the regularisation parameter. Defaults to 1e15.
  \item \emph{tol.c}: Tolerance for cautious updating. Defaults to 1e-8.
