@@ -3,9 +3,9 @@ Type: Package
 Title: Minimization Methods for Ill-Conditioned Problems
 Version: 1.0
 Date: 2024-05-27
-Author: Bert van der Veen
+Authors@R: c(person("Bert", "van der Veen", role = c("aut", "cre"), email = "bert_van_der_veen@hotmail.com"))
 Maintainer: Bert van der Veen <bert_van_der_veen@hotmail.com>
-Description: Methods for minimizing ill-conditioned problems. Currently only implements regularized newton optimization.
+Description: Implementation of methods for minimizing ill-conditioned problems. Currently only includes regularized (quasi-)newton optimization (Kanzow and Steck et al. (2023), <doi:10.1007/s12532-023-00238-4>).
 License: GPL (>= 2)
 Encoding: UTF-8
 RoxygenNote: 7.3.1
