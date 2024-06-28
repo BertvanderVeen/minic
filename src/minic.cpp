@@ -34,6 +34,7 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
                    const double &tolg,
                    const double &tolgamma,
                    const double &tolobj,
+                   const double &tolstep,
                    const double &tolmu,
                    const double &tolmu2,
                    const double &tolc,
@@ -250,7 +251,7 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
           break;
         }
 
-        rho = ared/pred;
+        rho = ared/pred; // trust region ratio
         if((std::isnan(rho) || rho<=c1)){ // reject, no improvement
           reject++;
           if(reject>maxreject){
@@ -274,6 +275,12 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
           x = x+d;mu0 = std::max(sigma1*mu0, tolmu);
           obj = objnew;
         }
+        
+        if(d.squaredNorm()<=tolstep){
+          info = 6;
+          break;
+        }
+        
         if(mu0>=tolmu2){
           info = 4;
           break;

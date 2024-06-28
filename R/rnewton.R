@@ -3,7 +3,7 @@
 #' @importFrom Rcpp evalCpp
 #' 
 rnewton <-function(x0, fn, gr, he = NULL, 
-                  quasi = TRUE, method = "LBFGS", verbose = FALSE, return.hess = FALSE, control = list(maxit = 1e3, m = 5, sigma1 = 0.5, sigma2 = 4, c1 = 1e-3, c2 = 0.9, pmin = 1e-3, tol.g = 1e-8, tol.gamma = 1e-5, tol.obj = 1e-8, tol.mu = 1e-4, tol.mu2 = 1e15, tol.c = 1e-8, report.iter = 10, grad.reject = FALSE, max.reject = 50, mu0 = 5), ...){
+                  quasi = TRUE, method = "LBFGS", verbose = FALSE, return.hess = FALSE, control = list(maxit = 1e3, m = 5, sigma1 = 0.5, sigma2 = 4, c1 = 1e-3, c2 = 0.9, pmin = 1e-3, tol.g = 1e-8, tol.gamma = 1e-5, tol.obj = 1e-8, tol.step = 1e-12, tol.mu = 1e-4, tol.mu2 = 1e15, tol.c = 1e-8, report.iter = 10, grad.reject = FALSE, max.reject = 50, mu0 = 5), ...){
   
   if(!quasi && is.null(he))stop("Function for hessian must be provided with 'quasi = FALSE'")
   
@@ -28,6 +28,8 @@ rnewton <-function(x0, fn, gr, he = NULL,
     x$tol.gamma = 1e-5
   if (!("tol.obj"%in% names(x)))
     x$tol.obj = 1e-8
+  if (!("tol.step"%in% names(x)))
+    x$tol.step = 1e-12
   if (!("tol.mu"%in% names(x)))
     x$tol.mu = 1e-4
   if (!("tol.mu2"%in% names(x)))
@@ -47,7 +49,7 @@ rnewton <-function(x0, fn, gr, he = NULL,
 
 control <- fill_control(control)
 
-maxit = control$maxit;m=control$m;sigma1=control$sigma1;sigma2=control$sigma2;c1=control$c1;pmin=control$pmin;c2=control$c2;tol.g=control$tol.g;tol.gamma=control$tol.gamma;tol.obj=control$tol.obj;tol.mu=control$tol.mu;tol.mu2=control$tol.mu2;tol.c=control$tol.c;report.iter=control$report.iter;max.reject=control$max.reject;grad.reject=control$grad.reject;mu0=control$mu0
+maxit = control$maxit;m=control$m;sigma1=control$sigma1;sigma2=control$sigma2;c1=control$c1;pmin=control$pmin;c2=control$c2;tol.g=control$tol.g;tol.gamma=control$tol.gamma;tol.obj=control$tol.obj;tol.step=control$tol.step;tol.mu=control$tol.mu;tol.mu2=control$tol.mu2;tol.c=control$tol.c;report.iter=control$report.iter;max.reject=control$max.reject;grad.reject=control$grad.reject;mu0=control$mu0
 
 # Defensive programming for tolerances
 if(pmin>1|pmin<0)stop("pmin must be between 0 and 1.")
@@ -77,14 +79,14 @@ if(inherits(lerr,"try-error")){
 
 if(quasi)he <- function()matrix(0)
   
-system.time(opt <- rnewt(x0=pars, fn=fn, gr=gr, he=he, gr0=t(grdold), d0=d, quasi=quasi, method = method, maxit = maxit, m = m, mu0 = mu0, sigma1 = sigma1, sigma2 = sigma2, c1 = c1, c2 = c2, pmin = pmin, tolg = tol.g, tolgamma = tol.gamma, tolobj = tol.obj, tolmu = tol.mu, tolmu2 = tol.mu2, tolc = tol.c , verbose = verbose, riter = report.iter, maxreject = max.reject, grdre = grad.reject, returnhess = return.hess))
+system.time(opt <- rnewt(x0=pars, fn=fn, gr=gr, he=he, gr0=t(grdold), d0=d, quasi=quasi, method = method, maxit = maxit, m = m, mu0 = mu0, sigma1 = sigma1, sigma2 = sigma2, c1 = c1, c2 = c2, pmin = pmin, tolg = tol.g, tolgamma = tol.gamma, tolobj = tol.obj, tolstep = tol.step, tolmu = tol.mu, tolmu2 = tol.mu2, tolc = tol.c , verbose = verbose, riter = report.iter, maxreject = max.reject, grdre = grad.reject, returnhess = return.hess))
 
 opt$par <- c(opt$par)
 if(!is.null(names(x0))) names(opt$par) <- names(x0)
 
 opt$convergence = FALSE
-# report succesful convergence if: reached gradient tolerance (1) or reached objective tolernace (3)
-if(opt$info %in% c(0, 1, 3))opt$convergence = TRUE 
+# report succesful convergence if: reached gradient tolerance (1), objective tolerance (3), or step tolerance (6)
+if(opt$info %in% c(1, 3, 6))opt$convergence = TRUE 
 
 class(opt) <- "rnewton"
 return(opt)
