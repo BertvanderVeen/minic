@@ -3,7 +3,7 @@
 #' @importFrom Rcpp evalCpp
 #' 
 rnewton <-function(x0, fn, gr, he = NULL, 
-                  quasi = TRUE, method = "LBFGS", verbose = FALSE, return.hess = FALSE, control = list(maxit = 1e3, m = 5, sigma1 = 0.5, sigma2 = 4, c1 = 1e-3, c2 = 0.9, pmin = 1e-3, tol.g = 1e-8, tol.gamma = 1e-5, tol.obj = 1e-8, tol.step = 1e-12, tol.mu = 1e-4, tol.mu2 = 1e15, tol.c = 1e-8, report.iter = 10, grad.reject = FALSE, max.reject = 50, mu0 = 5), ...){
+                  quasi = TRUE, method = "LBFGS", verbose = FALSE, return.hess = FALSE, control = list(maxit = 1e3, m = 5, sigma1 = 0.5, sigma2 = 4, c1 = 1e-3, c2 = 0.9, pmin = 1e-3, tol.g = 1e-8, tol.gamma = 1e-5, tol.obj = 1e-8, tol.step = 1e-14, tol.mu = 1e-4, tol.mu2 = 1e15, tol.c = 1e-8, report.iter = 10, grad.reject = FALSE, max.reject = 50, mu0 = 5), ...){
   
   if(!quasi && is.null(he))stop("Function for hessian must be provided with 'quasi = FALSE'")
   
@@ -29,7 +29,7 @@ rnewton <-function(x0, fn, gr, he = NULL,
   if (!("tol.obj"%in% names(x)))
     x$tol.obj = 1e-8
   if (!("tol.step"%in% names(x)))
-    x$tol.step = 1e-12
+    x$tol.step = 1e-14
   if (!("tol.mu"%in% names(x)))
     x$tol.mu = 1e-4
   if (!("tol.mu2"%in% names(x)))

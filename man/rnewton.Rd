@@ -13,7 +13,7 @@ rnewton(x0, fn, gr,
   return.hess = FALSE,
   control = list(maxit = 1000, m = 5, sigma1 = 0.5, sigma2 = 4, c1 = 0.001,
     c2 = 0.9, pmin = 0.001, tol.g = 1e-08, tol.gamma = 1e-05, tol.obj = 1e-08, 
-    tol.step = 1e-12, tol.mu = 1e-04, tol.mu2 = 1e+15, tol.c = 1e-08, report.iter = 10, 
+    tol.step = 1e-14, tol.mu = 1e-04, tol.mu2 = 1e+15, tol.c = 1e-08, report.iter = 10, 
     grad.reject = FALSE, max.reject = 50, mu0 = 5),
   ...
 )
@@ -47,7 +47,7 @@ rnewton(x0, fn, gr,
  \item \emph{tol.g}: Convergence tolerance for gradient. Defaults to 1e-8.
  \item \emph{tol.gamma}: Threshold for gamma paramter. Defaults to 1e-5.
  \item \emph{tol.obj}: Convergence tolerance for reduction in the objective. Defaults to 1e-8.
- \item \emph{tol.step}: Convergence tolerance for squared norm of the step. Defaults to 1e-12.
+ \item \emph{tol.step}: Convergence tolerance for squared norm of the step. Defaults to 1e-14.
  \item \emph{tol.mu}: Minimum threshold for the regularisation parameter. Defaults to 1e-4.
  \item \emph{tol.mu2}: Maximum threshold for the regularisation parameter. Defaults to 1e15.
  \item \emph{tol.c}: Tolerance for cautious updating. Defaults to 1e-8.
