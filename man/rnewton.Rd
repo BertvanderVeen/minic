@@ -45,7 +45,7 @@ rnewton(x0, fn, gr,
  \item \emph{c2}: Second constant for determining step success. Defaults to 0.9. See details.
  \item \emph{pmin}: Third constant for determining (lack of) step success. Defaults to 1e-3.
  \item \emph{tol.g}: Convergence tolerance for gradient. Defaults to 1e-8.
- \item \emph{tol.gamma}: Threshold for gamma paramter. Defaults to 1e-5.
+ \item \emph{tol.gamma}: Threshold for gamma parameter. Defaults to 1e-5.
  \item \emph{tol.obj}: Convergence tolerance for reduction in the objective. Defaults to 1e-8.
  \item \emph{tol.step}: Convergence tolerance for squared norm of the step. Defaults to 1e-14.
  \item \emph{tol.mu}: Minimum threshold for the regularisation parameter. Defaults to 1e-4.
@@ -54,7 +54,7 @@ rnewton(x0, fn, gr,
  \item \emph{report.iter}: If 'verbose = TRUE', how often should a report be printed? Defaults to every 10 iterations.
  \item \emph{max.reject}: Maximum number of consecutive rejections before algorithm terminates.
  \item \emph{grad.reject}: Logical. If TRUE the gradient is evaluated at every iteration and information of rejected steps is incorporated in limited-memory methods. Defaults to FALSE.
- \item \emph{mu0.reject}: Initial value of the regularisation parameter. Defaults to 5.
+ \item \emph{mu0}: Initial value of the regularisation parameter. Defaults to 5.
 }}
 
 \item{...}{Not used.}
@@ -66,7 +66,16 @@ An object of class "rnewton" including the following components:
  \item{iterations: }{ Number of completed iterations.}
  \item{evalg: }{ Number of calls to gr.}
  \item{par: }{ The best set of parameters found.}
- \item{info: }{ Convergence code.}
+ \item{info: }{ Convergence code.
+ \itemize{
+ \item 1: gradient tolerance reached.
+ \item 2: maximum number of unsuccesful iterations reached.
+ \item 3: insufficient improvement in objective function (ran into tol.obj).
+ \item 4: reached regularisation limit (ran into tol.mu2).
+ \item 5: reached maximum iterations.
+ \item 6: step tolerance reached.
+ }
+ }
  \item{maxgr: }{ Maximum absolute gradient component.}
  \item{convergence: }{ logical, TRUE indicating succesful convergence (reached tol.obj, tol.g, or tol.step).}
 }
