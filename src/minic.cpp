@@ -229,31 +229,33 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
         d = -pow(gamma+mu0, -1)*grd + pow(gamma+mu0, -2)*A.leftCols(2*si)*(Q.topLeftCorner(2*si,2*si)+pow(gamma+mu0,-1)*A.leftCols(2*si).transpose()*A.leftCols(2*si)).lu().solve(A.leftCols(2*si).transpose()*grd);
       }else if(method == 2){
         //LSR1 with strategy to handle ill-conditioned Q by omitting based on the magnitude of diagonal entries
-        int nonzerodiag = (Q.topLeftCorner(si, si).diagonal().array().abs() > tolc).count();
-        if(nonzerodiag<si){
-          MatrixXd Qsub(nonzerodiag, nonzerodiag);
-          MatrixXd Asub(x.rows(), nonzerodiag);
-          Eigen::VectorXi ind(nonzerodiag);
-          
-          int indcounter = 0;
-          for(int i=0; i<si; i++){
-            if(abs(Q.topLeftCorner(si, si)(i,i))>tolc){
-             ind(indcounter) = i;
-              indcounter ++;
-            }
-          }
-          //create new matrix
-          for (int i = 0; i < nonzerodiag; ++i) {
-            Asub.col(i) = A.leftCols(si).col(ind(i));
-            for (int j = 0; j < nonzerodiag; ++j) {
-              Qsub(i, j) = Q(ind(i), ind(j));
-            }
-          }
-          
-          d = -pow(gamma+mu0, -1)*grd + pow(gamma+mu0, -2)*Asub*(Qsub+pow(gamma+mu0,-1)*Asub.transpose()*Asub).lu().solve(Asub.transpose()*grd);
-        }else{
-          d = -pow(gamma+mu0, -1)*grd + pow(gamma+mu0, -2)*A.leftCols(si)*(Q.topLeftCorner(si,si)+pow(gamma+mu0,-1)*A.leftCols(si).transpose()*A.leftCols(si)).lu().solve(A.leftCols(si).transpose()*grd);
-        }
+        // int nonzerodiag = (Q.topLeftCorner(si, si).diagonal().array().abs() > tolc).count();
+        // if(nonzerodiag<si){
+        //   MatrixXd Qsub(nonzerodiag, nonzerodiag);
+        //   MatrixXd Asub(x.rows(), nonzerodiag);
+        //   Eigen::VectorXi ind(nonzerodiag);
+        //   
+        //   int indcounter = 0;
+        //   for(int i=0; i<si; i++){
+        //     if(abs(Q.topLeftCorner(si, si)(i,i))>tolc){
+        //      ind(indcounter) = i;
+        //       indcounter ++;
+        //     }
+        //   }
+        //   //create new matrix
+        //   for (int i = 0; i < nonzerodiag; ++i) {
+        //     Asub.col(i) = A.leftCols(si).col(ind(i));
+        //     for (int j = 0; j < nonzerodiag; ++j) {
+        //       Qsub(i, j) = Q(ind(i), ind(j));
+        //     }
+        //   }
+        //   
+        //   d = -pow(gamma+mu0, -1)*grd + pow(gamma+mu0, -2)*Asub*(Qsub+pow(gamma+mu0,-1)*Asub.transpose()*Asub).lu().solve(Asub.transpose()*grd);
+        // }else{
+        // FullPivLU for numerical stability here in case of ill-conditioned matrix
+        Eigen::FullPivLU<MatrixXd> lu(Q.topLeftCorner(si,si)+pow(gamma+mu0,-1)*A.leftCols(si).transpose()*A.leftCols(si));
+          d = -pow(gamma+mu0, -1)*grd + pow(gamma+mu0, -2)*A.leftCols(si)*lu.solve(A.leftCols(si).transpose()*grd);
+        //}
       }
     }else if(quasi){
       // lltH.compute(hess);
