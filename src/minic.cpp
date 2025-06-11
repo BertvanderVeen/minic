@@ -49,19 +49,18 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
   x.col(0) = x0;
   MatrixXd d(x0.rows(), 1);d.setZero(); //step direction
   d = d0;
-  MatrixXd p(1,1);
   // MatrixXd p(x0.rows(), 1);p.setZero();
   MatrixXd grd(x0.rows(), 1);grd.setZero();
   MatrixXd grdold(x0.rows(), 1);
   grdold = gr0;
-  MatrixXd hess = MatrixXd::Identity(x.rows(),x.rows());
-  // if(method == 4 | method == 5 | method == 6){
-  //   // BFGS
-  //   hess = MatrixXd::Identity(x.rows(),x.rows());
-  // } 
+  MatrixXd hess;
+
   if(!quasi){
     hess = Rcpp::as<MatrixXd>(he(x0));
+  }else if(quasi && method >3){
+    hess = MatrixXd::Identity(x.rows(),x.rows());
   }
+  
   int griter = 0; //nr grd. evals
   bool pass = true;
   bool firstpass = false;
@@ -78,13 +77,15 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
   if((method == 1) || (method == 3))s = 2*m;
   if(method == 2)s = m;
   int si = 0;
-  MatrixXd Y(x0.rows(), s);Y.setZero(); //diff in grd. of updates
-  MatrixXd S(x0.rows(), s);S.setZero(); //diff in pars. of updates
-  MatrixXd Q(1, 1);MatrixXd SY(1, 1);MatrixXd L(1, 1);
-  MatrixXd A(x.rows(), 1);
+  MatrixXd Y(x0.rows(), m);Y.setZero(); //diff in grd. of updates
+  MatrixXd S(x0.rows(), m);S.setZero(); //diff in pars. of updates
+  MatrixXd Q(s, s);Q.setZero();
+  MatrixXd SY(m, m);SY.setZero();
+  MatrixXd L(m, m);L.setZero();
+  MatrixXd A(x.rows(), s);A.setZero();
   Eigen::LLT<Eigen::MatrixXd> lltH;
   grd.col(0) = gr0;
-  MatrixXd y(x0.rows(), 1);
+  MatrixXd y(x0.rows(), 1);y.setZero();
   
   double sy;
 
@@ -119,14 +120,14 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
         
         if(((method == 1)| (method == 2)| (method ==3))){
           
-          if(!firstpass || ((method == 2) | (method == 3)) | ((method == 1) && (sy>=(tolc*d.squaredNorm())))){
+          if(!firstpass || ((method == 2) | (method == 3) | (method == 1)) && (sy>=(tolc*d.squaredNorm()))){
           //limited memory matrices
-          if(si == s){
+          if(si == m){
             // max memory: matrices are full
-            Y.leftCols(s-1) = Y.rightCols(s-1); //first s columns
-            Y.col(s-1) = y; //last column
-            S.leftCols(s-1) = S.rightCols(s-1);
-            S.col(s-1) = d;
+            Y.leftCols(m-1) = Y.rightCols(m-1); //first m columns
+            Y.col(m-1) = y; //last column
+            S.leftCols(m-1) = S.rightCols(m-1);
+            S.col(m-1) = d;
           }else{
             Y.col(si) = y;
             S.col(si) = d;
@@ -148,46 +149,46 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
         if((method == 1)| (method == 2)| (method ==3)){
           //limited memory updates
         
-          if(si<=s && SY.cols()<s){
-            SY.resize(si,si);
-          }
-          if(si<=s && L.cols()<s){
-            L.resize(si,si);
-          }
-          SY = S.leftCols(si).transpose()*Y.leftCols(si);
-          L = SY.triangularView<Eigen::StrictlyLower>();
-          Eigen::DiagonalMatrix<double,  Eigen::Dynamic> D = SY.diagonal().asDiagonal();
+          // if(si<=s && SY.cols()<s){
+          //   SY.resize(si,si);
+          // }
+          // if(si<=s && L.cols()<s){
+          //   L.resize(si,si);
+          // }
+          SY.topLeftCorner(si,si) = S.leftCols(si).transpose()*Y.leftCols(si);
+          L.topLeftCorner(si,si) = SY.topLeftCorner(si,si).triangularView<Eigen::StrictlyLower>();
+          Eigen::DiagonalMatrix<double,  Eigen::Dynamic> D = SY.topLeftCorner(si,si).diagonal().asDiagonal();
           
           if(method == 1){
-            if(si<=s && A.cols()<(2*s)){
-              A.resize(Eigen::NoChange, 2*si);
-            }
+            // if(si<=s && A.cols()<(2*s)){
+            //   A.resize(Eigen::NoChange, 2*si);
+            // }
             A.leftCols(si) = S.leftCols(si);
-            A.rightCols(si) = Y.leftCols(si);
-            if(si<=s  && Q.cols()<(2*s)){
-              Q.resize(2*si, 2*si);
-            }
-            Q.topLeftCorner(si,si) = -pow(gamma,-1)*S.leftCols(si).transpose()*S.leftCols(si);
-            Q.bottomLeftCorner(si,si) = -pow(gamma, -1)*L.transpose();
-            Q.topRightCorner(si,si) = -pow(gamma, -1)*L;
-            Q.bottomRightCorner(si,si) = D;
+            A.middleCols(si, si) = Y.leftCols(si);
+            // if(si<=s  && Q.cols()<(2*s)){
+            //   Q.resize(2*si, 2*si);
+            // }
+            Q.topLeftCorner(2*si,2*si).topLeftCorner(si,si) = -pow(gamma,-1)*S.leftCols(si).transpose()*S.leftCols(si);
+            Q.topLeftCorner(2*si,2*si).bottomLeftCorner(si,si) = -pow(gamma, -1)*L.topLeftCorner(si,si).transpose();
+            Q.topLeftCorner(2*si,2*si).topRightCorner(si,si) = -pow(gamma, -1)*L.topLeftCorner(si,si);
+            Q.topLeftCorner(2*si,2*si).bottomRightCorner(si,si) = D;
           } else if(method == 2){
-            if(si<=s && A.cols()<s){
-              A.resize(Eigen::NoChange, si);
-            }
-            if(si<=s && A.cols()<s){
-              Q.resize(si, si);
-            }
-            A = Y.leftCols(si)-gamma*S.leftCols(si);
-            Q = D.toDenseMatrix()+L+L.transpose()-gamma*S.leftCols(si).transpose()*S.leftCols(si);
+            // if(si<=s && A.cols()<s){
+            //   A.resize(Eigen::NoChange, si);
+            // }
+            // if(si<=s && A.cols()<s){
+            //   Q.resize(si, si);
+            // }
+            A.leftCols(si) = Y.leftCols(si)-gamma*S.leftCols(si);
+            Q.topLeftCorner(si,si) = D.toDenseMatrix()+L.topLeftCorner(si,si)+L.topLeftCorner(si,si).transpose()-gamma*S.leftCols(si).transpose()*S.leftCols(si);
             //This, SR1, still needs a rejection rule for ill-conditioned updates..
           }else if(method == 3){
-            if(si<=s && A.cols()<(2*s)){
-              A.resize(Eigen::NoChange, 2*si);
-            }
-            if(si<=s && Q.cols()<(2*s)){
-              Q.resize(2*si, 2*si);
-            }
+            // if(si<=s && A.cols()<(2*s)){
+            //   A.resize(Eigen::NoChange, 2*si);
+            // }
+            // if(si<=s && Q.cols()<(2*s)){
+            //   Q.resize(2*si, 2*si);
+            // }
             MatrixXd StS = S.leftCols(si).transpose()*S.leftCols(si);
             MatrixXd U = StS.triangularView<Eigen::Upper>(); // nonstrict upper triangular
             // diagonal and entries above to zero
@@ -197,11 +198,11 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
             //   }
             // }
             A.leftCols(si) = S.leftCols(si);
-            A.rightCols(si) = Y.leftCols(si);
-            Q.topLeftCorner(si,si) = MatrixXd::Zero(U.rows(), U.cols());
-            Q.bottomLeftCorner(si,si) = U.transpose();
-            Q.topRightCorner(si,si) = U;
-            Q.bottomRightCorner(si,si) = D.toDenseMatrix()+gamma*StS.diagonal().asDiagonal().toDenseMatrix()+L+L.transpose();
+            A.middleCols(si, si) = Y.leftCols(si);
+            Q.topLeftCorner(2*si,2*si).topLeftCorner(si,si) = MatrixXd::Zero(U.rows(), U.cols());
+            Q.topLeftCorner(2*si,2*si).bottomLeftCorner(si,si) = U.transpose();
+            Q.topLeftCorner(2*si,2*si).topRightCorner(si,si) = U;
+            Q.topLeftCorner(2*si,2*si).bottomRightCorner(si,si) = D.toDenseMatrix()+gamma*StS.diagonal().asDiagonal().toDenseMatrix()+L.topLeftCorner(si,si)+L.topLeftCorner(si,si).transpose();
            }
         }else if((method == 4) | (method == 5) | (method == 6)){
         //full hessian approximation
@@ -222,9 +223,38 @@ Rcpp::List rnewt(const Eigen::VectorXd &x0,
     }
     }
     
-    if(quasi && method <4){
+    if(quasi && method < 4){
       // p = (Q+pow(gamma+mu0,-1)*A.transpose()*A).lu().solve(A.transpose()*grd);
-      d = -pow(gamma+mu0, -1)*grd + pow(gamma+mu0, -2)*A*(Q+pow(gamma+mu0,-1)*A.transpose()*A).lu().solve(A.transpose()*grd);  
+      if((method == 1) || (method == 3)){
+        d = -pow(gamma+mu0, -1)*grd + pow(gamma+mu0, -2)*A.leftCols(2*si)*(Q.topLeftCorner(2*si,2*si)+pow(gamma+mu0,-1)*A.leftCols(2*si).transpose()*A.leftCols(2*si)).lu().solve(A.leftCols(2*si).transpose()*grd);
+      }else if(method == 2){
+        //LSR1 with strategy to handle ill-conditioned Q by omitting based on the magnitude of diagonal entries
+        int nonzerodiag = (Q.topLeftCorner(si, si).diagonal().array().abs() > tolc).count();
+        if(nonzerodiag<si){
+          MatrixXd Qsub(nonzerodiag, nonzerodiag);
+          MatrixXd Asub(x.rows(), nonzerodiag);
+          Eigen::VectorXi ind(nonzerodiag);
+          
+          int indcounter = 0;
+          for(int i=0; i<si; i++){
+            if(abs(Q.topLeftCorner(si, si)(i,i))>tolc){
+             ind(indcounter) = i;
+              indcounter ++;
+            }
+          }
+          //create new matrix
+          for (int i = 0; i < nonzerodiag; ++i) {
+            Asub.col(i) = A.leftCols(si).col(ind(i));
+            for (int j = 0; j < nonzerodiag; ++j) {
+              Qsub(i, j) = Q(ind(i), ind(j));
+            }
+          }
+          
+          d = -pow(gamma+mu0, -1)*grd + pow(gamma+mu0, -2)*Asub*(Qsub+pow(gamma+mu0,-1)*Asub.transpose()*Asub).lu().solve(Asub.transpose()*grd);
+        }else{
+          d = -pow(gamma+mu0, -1)*grd + pow(gamma+mu0, -2)*A.leftCols(si)*(Q.topLeftCorner(si,si)+pow(gamma+mu0,-1)*A.leftCols(si).transpose()*A.leftCols(si)).lu().solve(A.leftCols(si).transpose()*grd);
+        }
+      }
     }else if(quasi){
       // lltH.compute(hess);
       d = -(hess + mu0*MatrixXd::Identity(hess.rows(),hess.cols())).lu().solve(grd);
